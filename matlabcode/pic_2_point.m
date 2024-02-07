@@ -11,7 +11,6 @@ function point=pic_2_point(picture,pic_size)
     pic_resized=imresize(pic_gray,[pic_size pic_size]);
     highpass_filter=[-1 -1 -1;-1 15 -1;-1 -1 -1];
     pic_filted=imfilter(pic_resized,highpass_filter);
-    % change block place to high value
     position_unsorted=get_pos(pic_filted,pic_size);
     position_sorted=path_plan(position_unsorted,pic_size);
     point=add_mid_point(position_sorted);
@@ -29,6 +28,7 @@ function point_unsorted=get_pos(picture,pic_size)
             point_unsorted: a nx2 matrix contain block point position 
             with n: num of block point on the picture 2:x pos and y pos
     %}
+    % change block place to high value
     pic=255-picture;
     data.x=0;
     data.y=0;
