@@ -79,29 +79,48 @@ waypointAccelTimes = diff(waypointTimes)/4;
 show(robot,config);
 hold on
 
-% set(hTraj,  "xdata" , q(1,:),  "ydata" , q(2,:),  "zdata" , q(3,:));
-
 ik = inverseKinematics( 'RigidBodyTree' ,robot);
 ikWeights = [1 1 1 1 1 1];
 ikInitGuess =  robot.homeConfiguration; % 随机设置一个初始状态
 
+joint_position=zeros(5,length(q));
+
 for idx = 1:length(q)
     % 解逆运动学方程
-
     Q=q(:,idx);
     Q=Q';
     tgtPose = trvec2tform(Q);
     [config,info] = ik( 'endeffector', tgtPose,ikWeights,ikInitGuess);
     ikInitGuess = config; % 以上一时刻的状态作为下一时刻的初始值
 
+    for m=1:5
+        joint_position(m,idx)=config(m).JointPosition;
+    end
+
+end
+
+q2=zeros(3,length(q));
+n=5;
+joint_position_2=[0;0;0;0;0];
+for i=1:n
+    q2(:,i)=q(:,i);
+    joint_position_2(:,i)= joint_position(:,i);
+end
+
+for idx =n+1:length(q)
+    %Moving Average Filter
+    for m=1:5
+        joint_position_2(m,idx)= joint_position_2(m,idx-1)+(joint_position(m,idx)-joint_position(m,idx-n))/n;
+        config(m).JointPosition=joint_position_2(m,idx);
+    end
+    transform = getTransform(robot,config,"endeffector","base");
+    q2(1,idx)=transform(1,4);
+    q2(2,idx)=transform(2,4);
+    q2(3,idx)=transform(3,4);
     % 画出机器人的动态
     show(robot,config , "PreservePlot" ,false);
-    ylabel([ 'Trajectory at t = ' num2str(trajTimes(idx))]);
-    hTraj = plot3(q(1,idx),q(2,idx),q(3,idx), "b.-" );
     view(135,45);
-    % xlim([-0.25 0.25])
-    % ylim([-0.25 0.25])
-    % zlim([-0.25 0.25])
-    drawnow    
+    drawnow
+    hTraj2 = plot3(q2(1,idx),q2(2,idx),q2(3,idx), "r.-" );
 end
 hold off
