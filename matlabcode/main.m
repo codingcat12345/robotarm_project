@@ -78,8 +78,8 @@ waypointAccelTimes = diff(waypointTimes)/4;
 
 show(robot,config);
 hold on
-hTraj = plot3(waypoints(1,1),waypoints(2,1),waypoints(3,1), "b.-" );
-set(hTraj,  "xdata" , q(1,:),  "ydata" , q(2,:),  "zdata" , q(3,:));
+
+% set(hTraj,  "xdata" , q(1,:),  "ydata" , q(2,:),  "zdata" , q(3,:));
 
 ik = inverseKinematics( 'RigidBodyTree' ,robot);
 ikWeights = [1 1 1 1 1 1];
@@ -97,6 +97,11 @@ for idx = 1:length(q)
     % 画出机器人的动态
     show(robot,config , "PreservePlot" ,false);
     ylabel([ 'Trajectory at t = ' num2str(trajTimes(idx))]);
+    hTraj = plot3(q(1,idx),q(2,idx),q(3,idx), "b.-" );
     view(135,45);
+    % xlim([-0.25 0.25])
+    % ylim([-0.25 0.25])
+    % zlim([-0.25 0.25])
     drawnow    
 end
+hold off
